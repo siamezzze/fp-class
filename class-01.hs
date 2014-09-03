@@ -46,12 +46,16 @@ avg a b = (a + b)/2
 -}
 
 avg3 :: Double -> Double -> Double -> Double
-avg3 a b c = undefined
+avg3 a b c = (a + b + c)/3
 
 {-
    Результаты проверки:
 
-   ???
+*Main> avg3 2 4 6
+4.0
+*Main> avg3 2 4 7
+4.333333333333333
+
 
 -}
 
@@ -62,7 +66,7 @@ avg3 a b c = undefined
    обращая внимание на обозначения и приоритеты операций, стандартные функции,
    расстановку скобок:
 
-    2 + 3
+    2 + 3 
     mod 10 4
     10 `mod` 4
     True && 5 < 10
@@ -75,6 +79,35 @@ avg3 a b c = undefined
     error "AAAA!!!!"
     12345^54321
     2 < 3 || 9999954321^99912345 > 12345^54321
+
+
+*Main> 2 + 3
+5
+*Main> mod 10 4
+2
+*Main> True && 5 < 10
+True
+*Main> 5 < 7 || 10 > 3
+True
+*Main> sqrt(-2)
+NaN
+*Main> sqrt (sqrt 16)
+2.0
+*Main> let x = 4 in (sin x)^2 + (cos x)^2
+1.0
+*Main> x
+
+<interactive>:48:1: Not in scope: `x'
+*Main> 7^(-1)
+*** Exception: Negative exponent
+*Main> error "AAAA!!!!"
+*** Exception: AAAA!!!!
+
+*Main> 12345^54321
+<...>
+*Main> 2 < 3 || 9999954321^99912345 > 12345^54321
+True
+
 
 -}
 
@@ -101,6 +134,24 @@ avg3 a b c = undefined
    if 2 > 3 then 7 else 5
    5 > 6 && False
 
+*Main> :t 5
+5 :: Num a => a
+*Main> :t 5.0
+5.0 :: Fractional a => a
+*Main> :t sqrt 4
+sqrt 4 :: Floating a => a
+*Main> :t sqrt 4.0
+sqrt 4.0 :: Floating a => a
+*Main> :t 2+3
+2+3 :: Num a => a
+*Main> :t 5 < 7
+5 < 7 :: Bool
+*Main> :t if 2 > 3 then 7 else 5
+if 2 > 3 then 7 else 5 :: Num a => a
+*Main> :t 5 > 6 && False
+5 > 6 && False :: Bool
+
+
    Команда ":set +t" включает режим, при котором печатается тип каждого вычисляемого выражения.
    Команда ":set +s" включает режим, при котором печатается время вычисления каждого выражения.
 
@@ -109,27 +160,28 @@ avg3 a b c = undefined
 -- 5) Объявление функций (2)
 
 -- а) Удвоение значения заданного числа
--- (объясните смысл типовой аннотации: ???)
+-- (объясните смысл типовой аннотации: ограничение на тип принимаемого значения)
 double :: Num a => a -> a
-double a = undefined
+double a = a * 2
 
 -- б) Утроение заданного числа
 --    (типовую аннотацию и образцы параметров следует написать самостоятельно)
-triple = undefined
+triple :: Num a => a -> a
+triple a = a * 3
 
 -- в) Определение наибольшего из трёх заданных целых чисел (можно воспользоваться стандартной
 --    двухаргументной функцией max).
 max3 :: Ord a => a -> a -> a -> a
-max3 = undefined
+max3 a b c = max a (max b c) 
 
 {-
   Проверка:
 > max3 87 34 209
-???
+209
 > max3 22 28 30
-???
+30
 > max3 12 25 (-7)
-???
+25
 
 -}
 
@@ -137,19 +189,58 @@ max3 = undefined
 -- (пользоваться стандартными логическими операциями не следует, обратите внимание на
 --  образцы параметров функции, последняя строка -- "во всех остальных случаях").
 bothTrue :: Bool -> Bool -> Bool
-bothTrue True True = undefined
-bothTrue _  _ = undefined
+bothTrue True True = True
+bothTrue _  _ = False
 
+
+{--
+проверка:
+*Main> bothTrue (5 < 7) (8 > 9)
+False
+*Main> bothTrue (5 < 7) (89 > 9)
+True
+*Main> bothTrue (58 < 7) (89 > 9)
+False
+*Main> bothTrue (58 < 7) (0 > 9)
+False
+
+--}
 
 -- д) Функция, возвращающая True, если только один из её аргументов равен True,
 -- и False в противном случае (пользоваться стандартными логическими операциями не следует).
 oneTrue :: Bool -> Bool -> Bool
-oneTrue = undefined
+oneTrue True False = True
+oneTrue False True = True
+oneTrue _ _ = False
+
+{--
+*Main> oneTrue (9 < 78) (8 < 65)
+False
+*Main> oneTrue (9 < 0) (8 < 4)
+False
+*Main> oneTrue (9 < 0) (8 < 9)
+True
+*Main> oneTrue (9 < 78) (8 < 65)
+False
+*Main> oneTrue (9 < 78) (8 < 5)
+True
+
+--}
 
 -- е) Дана температура в градусах Фаренгейта. Вычислить соответствующую температуру
 -- в градусах Цельсия.
 f2c :: Double -> Double
-f2c = undefined
+f2c f = (f - 32) * 5 / 9
+
+{--
+*Main> f2c (-40)
+-40.0
+*Main> f2c (-459.67)
+-273.15
+*Main> f2c 0
+-17.77777777777778
+
+--} 
 
 {-
    ж) Найти наибольший общий делитель двух целых чисел, пользуясь
@@ -158,7 +249,9 @@ f2c = undefined
       НОД(a, 0) = a.
 -}
 -- gcd' :: ???
-gcd' = undefined
+gcd' :: Int -> Int -> Int
+gcd' a 0 = a
+gcd' a b = gcd' b (a mod b)
 
 -- з) Функция, возвращающая название дня недели по его номеру (от 1 до 7),
 --    если номер неправильный, генерируется исключение (функция error).
