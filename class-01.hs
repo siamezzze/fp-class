@@ -38,7 +38,9 @@ avg a b = (a + b)/2
 7.0
 
   а) Вычислите в ghci среднее арифметическое следующих пар чисел: 332 и 723, 34.34 и 93.27.
-     Впишите ответы:
+     Впишите ответы: 527.5 63.805
+
+
 
   б) Напишите функцию avg3, вычисляющую среднее арифметическое трёх заданных чисел.
      Проверьте результаты её работы на двух тройках чисел.
@@ -160,7 +162,7 @@ if 2 > 3 then 7 else 5 :: Num a => a
 -- 5) Объявление функций (2)
 
 -- а) Удвоение значения заданного числа
--- (объясните смысл типовой аннотации: ограничение на тип принимаемого значения)
+-- (объясните смысл типовой аннотации: double является функцией, принимающей на вход значение типа a и возвращающей значение типа a, где a является числовым типом)
 double :: Num a => a -> a
 double a = a * 2
 
@@ -191,7 +193,7 @@ max3 a b c = max a (max b c)
 bothTrue :: Bool -> Bool -> Bool
 bothTrue True True = True
 bothTrue _  _ = False
-
+--Наверное, не самый красивый способ, ну да ладно
 
 {--
 проверка:
@@ -212,6 +214,7 @@ oneTrue :: Bool -> Bool -> Bool
 oneTrue True False = True
 oneTrue False True = True
 oneTrue _ _ = False
+-- ..тем более
 
 {--
 *Main> oneTrue (9 < 78) (8 < 65)
@@ -364,15 +367,24 @@ sum_pow n k = sum(map ((flip pow)(k)) [1..n])
 
 -- д) Сумма факториалов чисел от 1 до n.
 sum_fact 1 = 1
-sum_fact n = undefined
+sum_fact n = sum_fact(n-1) + fact(n) --ужас какой, да. Надеюсь, хотя бы компилятор это оптимизирует...
   where
-    fact n = undefined
+    fact 1 = 1
+    fact n = n * fact(n-1)
 
 -- е) Количество цифр целого числа
-number_digits = undefined
+number_digits :: (Integral a, Ord a) => a -> Int
+number_digits n
+	| n < 0 = number_digits (-n)
+	| n < 10 = 1
+	| otherwise = 1 + number_digits(div n 10)
 
 -- ж) Проверить, является ли заданное число простым.
-isPrime = undefined
+isPrime :: Int -> Bool
+isPrime n = notDividedBy n (floor (sqrt (fromIntegral n) ) )
+  where
+	notDividedBy _ 1 = True
+	notDividedBy n k = ((mod n k) /= 0) && (notDividedBy n (k-1))
 
 -- 8) Разное
 
@@ -384,6 +396,19 @@ isPrime = undefined
   а 1200 и 2000 — являются).
 -}
 
-nDays year = undefined
+--Я как-то не умею (ну, или просто не привыкла) ставить пробелы в именах функций, так что переименовала, извините.
+
+{--
+nDaysYear n = 
+  if isLeap n
+	then 366
+    else 365 
   where
-    isLeap = undefined
+	isLeap p = (mod p 4 == 0) && (mod p 100 /= 0) || (mod p 400 == 0)
+--}	
+-- Ладно, if-then-else в Haskell - это, наверное, плохо
+nDaysYear n  
+	| isLeap n = 366
+    | otherwise = 365 
+  where
+	isLeap p = (mod p 4 == 0) && (mod p 100 /= 0) || (mod p 400 == 0)	
