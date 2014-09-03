@@ -251,12 +251,32 @@ f2c f = (f - 32) * 5 / 9
 -- gcd' :: ???
 gcd' :: Int -> Int -> Int
 gcd' a 0 = a
-gcd' a b = gcd' b (a mod b)
+gcd' a b = gcd' b (mod a b)
+
+
+{--
+*Main> gcd 56 4
+4
+*Main> gcd 56 3
+1
+*Main> gcd 7 97
+1
+*Main> gcd 45 20
+5
+
+--}
 
 -- з) Функция, возвращающая название дня недели по его номеру (от 1 до 7),
 --    если номер неправильный, генерируется исключение (функция error).
 dayOfWeek :: Int -> String
-dayOfWeek = undefined
+dayOfWeek 1 = "Monday"
+dayOfWeek 2 = "Tuesday"
+dayOfWeek 3 = "Wednesday"
+dayOfWeek 4 = "Thursday"
+dayOfWeek 5 = "Friday"
+dayOfWeek 6 = "Saturday"
+dayOfWeek 7 = "Sunday"
+dayOfWeek _ = error "No such day of week, sorry."
 
 
 -- Далее типовые аннотации, если их нет, следует писать самостоятельно.
@@ -277,13 +297,20 @@ sign a
 	  x^2,  если 0 < x < 2,
           4,    если x ≥ 2.
 -}
-
-eval_f = undefined
+eval_f :: (Num a, Ord a) => a -> a
+eval_f x
+    | x <= 0 = -x
+    | x >= 2 = 4
+    | otherwise = x*x
 
 -- б) Написать функцию, возвращающую текстовую характеристику ("hot", "warm", "cool", "cold")
 -- по заданному значению температуры в градусах Цельсия.
 describeTemperature :: Double -> String
-describeTemperature = undefined
+describeTemperature t
+    | t < 10 = "cold"
+    | t < 25 = "cool"
+    | t < 35 = "warm"
+    | otherwise = "hot"
 
 {- 
    в) (*) Дан список температур в градусах Фаренгейта. Вывести для каждого значения
@@ -305,20 +332,35 @@ sum_n n
   | otherwise = error "n should be >= 1"
 
 -- а) Вычислить сумму всех целых чисел от a до b включительно.
-sum_ab = undefined
+sum_ab a b
+    | a == b = a
+    | a > b = (sum_ab b a)
+    | otherwise = a + (sum_ab (a + 1) b) 
 
 {-
    б) Числовая последовательность определяется следующим образом:
       a1 = 1, a2 = 2, a3 = 3, a_k = a_{k−1} + a_{k−2} − 2*a_{k−3}, k = 4, 5, ...
       Вычислить её n-й элемент.
 -}
-eval_a_n = undefined
+eval_a_n :: Int -> Int
+eval_a_n 1 = 1
+eval_a_n 2 = 2
+eval_a_n 3 = 3
+eval_a_n n
+    | n < 1 = error "No such element"
+    | otherwise = (eval_a_n (n - 1) ) + (eval_a_n (n - 2) ) - (2 * (eval_a_n (n - 3) ) )
 
 -- в) Вычислить, пользуясь рекурсией, n-ю степень числа a (n - целое):
-pow = undefined
+pow _ 0 = 1
+pow 0 _ = 0
+pow 1 _ = 1
+pow a n
+    | n < 0 = 1 / (pow a (-n))
+    | otherwise = a * (pow a (n - 1) )
 
 -- г) Пользуясь ранее написанной функцией pow, вычислить сумму: 1^k + 2^k + ... + n^k.
-sum_nk = undefined
+
+sum_pow n k = sum(map ((flip pow)(k)) [1..n])
 
 -- д) Сумма факториалов чисел от 1 до n.
 sum_fact 1 = 1
