@@ -2,14 +2,14 @@
 -- Написать функцию, которая разбивает промежуток времени в секундах на часы, минуты и секунды.
 -- Результат возвращать в виде кортежа из трёх элементов. Реализовать также обратное преобразование.
 sec2hms :: Int -> (Int, Int, Int)
-sec2hms = undefined
+sec2hms s = (s `div` 3600, s `mod` 3600 `div` 60 , s `mod` 60)
 
 hms2sec :: (Int, Int, Int) -> Int
-hms2sec (h, m, s) = undefined
+hms2sec (h, m, s) = h * 3600 + m * 60 + s
 
 -- Реализовать с помощью hms2sec (здесь параметры заданы по отдельности)
 hms2sec' :: Int -> Int -> Int -> Int
-hms2sec' = undefined
+hms2sec' h m s = hms2sec(h,m,s)
 
 -- должно быть True
 test1 = and $ map (\x -> x == hms2sec (sec2hms x)) [1,10..10000]
@@ -20,15 +20,16 @@ test1 = and $ map (\x -> x == hms2sec (sec2hms x)) [1,10..10000]
 -- б) периметр и площадь треугольника по координатам вершин.
 
 type Point = (Double, Double)
+--Похоже, уже есть стандартый length, для списков
+length' :: Point -> Point -> Double
+length' (x1, y1) (x2, y2) = sqrt((x2-x1)^2 + (y2-y1)^2)
 
-length :: Point -> Point -> Double
-length (x1, y1) (x2, y2) = undefined
-
--- triangle :: ??? -> (Double, Double)
-triangle _ = (p, s)
+triangle :: Point -> Point -> Point -> (Double, Double)
+triangle a b c = (p, s)
   where
-    p = undefined
-    s = undefined
+    p = (length' a b) + (length' b c) + (length' c a)
+    s = sqrt (p * (p - length' a b) * (p - length' b c) * (p - length' c a))
+-- Не получается у меня писать красиво и без скобок :(
 
 -- Во всех следующих заданиях использование стандартных функций обработки списков не допускается.
 -- Все решения должны реализовываться рекурсивными функциями.
@@ -37,7 +38,7 @@ triangle _ = (p, s)
 -- Определить рекурсивную функцию, определяющую количество чётных элементов списка
 nEven :: Integral a => [a] -> Int
 nEven [] = 0
-nEven (x:xs) = undefined
+nEven (x:xs) = if even x then 1 + nEven xs else nEven xs 
 
 -- 2.2
 -- Увеличить все элементы заданного списка в два раза.
@@ -45,14 +46,15 @@ nEven (x:xs) = undefined
 -- > 1 : [2,3,4]
 --   [1,2,3,4]
 doubleElems :: Num a => [a] -> [a]
-doubleElems = undefined
+doubleElems [] = []
+doubleElems (x:xs) = (x*2) : doubleElems xs
 
 
 -- 2.3
 -- Дан список целых чисел. Сформировать новый список, содержащий только нечетные элементы исходного.
 fltOdd :: Integral a => [a] -> [a]
 fltOdd [] = []
-fltOdd (x:xs) = undefined
+fltOdd (x:xs) = if odd x then x : fltOdd xs else fltOdd xs 
 
 
 -- 2.4
