@@ -124,12 +124,17 @@ ndigitsnumbers n = map ("1"++) (iterate (\l -> map("0" ++ ) l ++ (map ("1" ++ ) 
 f3a :: [Char] -> [[Char]]
 f3a = groupBy (\x y -> isDigit x == isDigit y)
 
-f3b :: [(Double,Double)] -> [(Double, Double)]
+f3b :: [(Double,Double)] -> [[(Double, Double)]]
 f3b = groupBy (\x y -> ((fst x < 0) == (fst y < 0)) && ((snd x < 0) == (snd y < 0)) )
 
+divide' :: Int -> Int -> [a] -> [[a]]
+divide' n m = takeWhile(not . null) . map(take n) . iterate(drop m)  
+
+f3c :: Int -> [a] -> [[a]]
+f3c n = divide' n n 
 
 f3d :: [a] -> Int -> Int -> [[a]]
-f3d xs n m = undefined
+f3d xs n m = divide' n m xs
 
 -- Должно быть True
 test_f3d = f3d [1..10] 4 2 == [[1,2,3,4],[3,4,5,6],[5,6,7,8],[7,8,9,10],[9,10]]
