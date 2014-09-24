@@ -1,3 +1,5 @@
+import Data.Char
+import Data.List
 {-
 Явная рекурсия в решениях хотя и допускается, но не приветствуется. Старайтесь обходиться стандартными
 функциями, используя при этом создание функций «на лету». Пытайтесь максимально упростить уже написанные
@@ -70,9 +72,8 @@ f12b = map(\(x,y) -> (sqrt x ^ 2 + y ^ 2, atan2 y x))
   b) Извлечь из него подсписок слов заданной длины.
   c) Извлечь из него подсписок слов, начинающихся с заданной буквы.
 -}
-
-{--f13a :: [String] -> [String]
-f13a = map (map Data.Char.toUpper) --}
+f13a :: [String] -> [String]
+f13a = map (map Data.Char.toUpper)
 
 f13b :: Char -> [String] -> [String]
 f13b c = filter((== c) . head)
@@ -87,11 +88,26 @@ f13b c = filter((== c) . head)
 -}
 
 nats :: [Integer]
+{--nats = [0..]--}
 nats = iterate (1+) 0
 
 {--Так, а четных - начиная с какого? --}
 evens :: [Integer]
+{--evens = [0,2..]--}
 evens = iterate (2+) 0
+
+sequence_list :: [Double]
+sequence_list = iterate (\x -> (1 + x) / 2) 1 
+{--Там просто все единицы будут--}
+{--sequence_list = repeat 1--}
+
+letters :: [Char]
+{--letters = ['a'..'z'] ++ ['A'..'Z']--}
+letters = (take 26 . iterate (chr . (+1) . ord)) 'a' ++ (take 26 . iterate (chr . (+1) . ord)) 'A'
+
+ndigitsnumbers :: Int -> [String]
+ndigitsnumbers n = map ("1"++) (iterate (\l -> map("0" ++ ) l ++ (map ("1" ++ ) l)) [""] !! (n - 1))
+
 
 {-
 3. Группировка списков.
@@ -104,6 +120,13 @@ evens = iterate (2+) 0
      длиной n элементов со сдвигом относительно предыдущего подсписка на m элементов.
   e) Дан список. Определить длину самого длинного подсписка, содержащего подряд идущие одинаковые элементы.
 -}
+
+f3a :: [Char] -> [[Char]]
+f3a = groupBy (\x y -> isDigit x == isDigit y)
+
+f3b :: [(Double,Double)] -> [(Double, Double)]
+f3b = groupBy (\x y -> ((fst x < 0) == (fst y < 0)) && ((snd x < 0) == (snd y < 0)) )
+
 
 f3d :: [a] -> Int -> Int -> [[a]]
 f3d xs n m = undefined
