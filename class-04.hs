@@ -114,6 +114,30 @@ f2d_test3 = f2d "zone" == ""
 {--  e) Сформировать список, содержащий все локальные минимумы исходного списка. --}
 
 f2e :: (Ord a) => [a] -> [a]
+f2e [] = []
+f2e (_:[]) = []
+f2e (x:y:[]) = if (x < y) then [y] else if (y < x) then [x] else []
+f2e (x0:x1:xs) = (\(x,(y,z)) -> if (z > y) then x ++ [z] else x) $ foldl (\(res, (pr, cur)) next ->  if (cur > pr) && (cur > next) then  ((res ++ [cur]), (cur, next)) else (res, (cur, next))) ((if (x0 > x1) then [x0] else []), (x0, x1)) xs
+{--								^ обработка последнего элемента																																	^ обработка первого элемента--}																																				
+f2e_test1 = f2e [1,3,1,6,7,8,1,8] == [3,8,8]
+f2e_test2 = f2e "SOS" == "SS"
+f2e_test3 = f2e [1,5] == [5]
+
+{--f) Дана строка, содержащая слова, разделённые одним или несколькими пробелами. Сформировать
+     список слов этой строки.  --}
+f2f :: [Char] -> [[Char]]
+f2f xs = fst $ foldr(\ch (words, word) -> if (ch == ' ') then (if (word == "") then (words,word) else ((word:words),"")) else (words,ch:word)) ([],"") (' ':xs)
+f2f_test1 = f2f "When The   Music's Over" == ["When","The","Music's", "Over"]
+f2f_test2 = f2f " Lark's Tounges In Aspic" == ["Lark's","Tounges","In","Aspic"]
+f2f_test3 = f2f "Set The Controls For The Heart Of The Sun" == ["Set","The","Controls","For","The","Heart","Of","The","Sun"]
+
+{--g) Разбить список на непересекающиеся подсписки длиной n элементов. --}
+f2g :: Int -> [a] -> [[a]]
+f2g n = (\(x, (y0,y1)) -> x ++ [y0]) . foldl(\(sublists, (sublist, k)) elem -> if (k == 0) then (sublists ++ [sublist], ([elem], n-1)) else (sublists, (sublist ++ [elem], k-1))) ([],([],n))
+f2g_test1 = f2g 5 [1..15] == [[1..5],[6..10],[11..15]]
+f2g_test2 = f2g 1 [1..5] == [[1],[2],[3],[4],[5]]
+f2g_test3 = f2g 3 "paint it black" == ["pai","nt ","it ","bla","ck"]
+
 
 {-
  3. Использование свёртки как носителя рекурсии (для запуска свёртки можно использовать список типа [1..n]).
