@@ -154,7 +154,28 @@ f2k_test3 = f2k (\x -> x `mod` 3 == 1) [1,4,7,9,70,100] == [1,4,7]
 
 {--l) Повторить каждый элемент списка заданное количество раз.--}
 f2l :: Int -> [a] -> [a]
-f2l n = foldr1(\x y -> (replicate n x) ++ y)
+f2l n = foldr(\x y -> replicate n x ++ y) [] 
+f2l_test1 = f2l 3 [1..5] == [1,1,1,2,2,2,3,3,3,4,4,4,5,5,5]
+f2l_test2 = f2l 2 "spring" == "sspprriinngg"
+f2l_test3 = f2l 5 "owl" == "ooooowwwwwlllll"
+
+{--  m) Удалить из списка повторяющиеся подряд идущие элементы. --}
+
+f2m :: Eq a => [a] -> [a]
+f2m [] = []
+f2m (x:xs) = (\(x,y) -> (x ++ [y])) $ foldl(\(lst,prev) y -> if y /= prev then ((lst++[prev]),y) else (lst,prev)) ([],x) xs
+f2m_test1 = f2m "moonshake" == "monshake"
+f2m_test2 = f2m "doom and gloom" == "dom and glom"
+f2m_test3 = f2m [4,4,4,4,6,9,7,7,8] == [4,6,9,7,8]
+
+{--  n) Даны два списка одинаковой длины. Сформировать список, состоящий из результатов применения
+     заданной функции двух аргументов к соответствующим элементам исходных списков. --}
+{--zip' xs ys = fst $ foldl (\(res, (k:ks)) y -> ((k,y):res, ks)) ([],xs) ys --}
+f2n :: (a -> a -> b) -> [a] -> [a] -> [b]
+f2n f xs ys = foldl (\ys (x0, x1) -> (f x0 x1):ys) [] $ fst $ foldl (\(res, (k:ks)) y -> ((k,y):res, ks)) ([],xs) ys
+f2n_test1 = f2n (+) [1..3] [2..4] == [3,5,7]
+f2n_test2 = f2n (*) [1..3] [2..4] == [2,6,12]
+f2n_test3 = f2n (\x y -> y) "Bel" "Air" == "Air"
 
 {-
  3. Использование свёртки как носителя рекурсии (для запуска свёртки можно использовать список типа [1..n]).
