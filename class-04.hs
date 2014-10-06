@@ -195,7 +195,10 @@ f3a_test3 = f3a 10 12 == 33
 
 {--  b) Найти сумму факториалов чисел от a до b (повторные вычисления факториалов не допускаются). --}
 f3b :: Int -> Int -> Int
-f3b a b = fst $ foldl (\(s,prevf) y -> (s + prevf * y, prevf * y)) (0, f3a 1 (a-1)) [a..b]
+f3b a b = fst $ foldl (\(s,prevf) y -> (s + prevf * y, prevf * y)) (0, foldl (*) 1 [1..(a-1)]) [a..b]
+f3b_test1 = f3b 1 3 == 9
+f3b_test2 = f3b 9 15 == 1401602590080
+f3b_test3 = f3b 5 5 == 120
 
 
 {--  с) Сформировать список из первых n чисел Фибоначчи.--}
@@ -218,12 +221,32 @@ f3d x n = fst $ foldl (\(tsum, (sign, (power, fact))) k -> newelem tsum sign pow
 				newpow   = power * x * x
 				newfact  = fact * (k+1) * (k + 2)
 			in (tsum + sign * power / fact, (newsign, (newpow, newfact)))
+			
+{--e) Проверить, является ли заданное целое число простым.--}
+f3e :: Int -> Bool
+f3e x = foldl(\res d -> res && ((mod x d) /= 0)) True [2..(floor (sqrt (fromIntegral x) ) )]
+f3e_test1 = not $ f3e 8767 
+f3e_test2 = f3e 8761
+f3e_test3 = f3e 97151
 
 {-
  4. Решить задачу о поиске пути с максимальной суммой в треугольнике (см. лекцию 3) при условии,
    что необходимо дополнительно найти сам путь (к примеру, в виде закодированных направлений спуска:
    0 - влево, 1 - вправо). В решении допускается использование любых стандартных функций.
 -}
+maxwithpath :: (Int, String) -> (Int,String) -> (Int,String)
+maxwithpath (r,pathr) (l, pathl) = if (r > l) then (r, pathr ++ "r") else (l, pathl ++ "l")
+
+addlower :: Int -> (Int, String) -> (Int, String)
+addlower x (y,pathy) = (x + y, pathy)
+
+downstep :: [(Int,String)] -> [Int] -> [(Int, String)]
+downstep upper lower = zipWith addlower lower $ zipWith maxwithpath ((0,""):upper) (upper ++ [(0,"")])
+
+answer :: [[Int]] -> (Int,String)
+answer = (\(x, p:pathx) -> (x,pathx)) . foldl1 (\(x,pathx) (y,pathy) -> if (x > y) then (x,pathx) else (y, pathy)) . foldl downstep [(0,[])] 
+
+f4_test1 = answer [[3],[7,4],[2,4,6],[8,5,9,3]] == (23,"lrr")
 
 {-
  5. Пусть числовые матрицы представлены списками строк. Реализовать следующие функции:
@@ -231,9 +254,79 @@ f3d x n = fst $ foldl (\(tsum, (sign, (power, fact))) k -> newelem tsum sign pow
   2) сумма двух матриц;
   3) произведение двух матриц.
 -}
+{--1) транспонирование матрицы;--}
+
+{-- Хотела обойтись без вспомогательных функций, но тогда совсем непонятно бы было --}
+
+length' = foldl (\x y -> x + 1) 0
+
+replicate' n x = foldl (\a b -> a ++ [x]) [] [1..n]
+
+nest :: [[a]] -> [a] -> [[a]]
+nest nests eggs = fst $ foldl (\(nested,nest:empty) egg -> (nested ++ [nest ++ [egg]],empty)) ([],nests) eggs 
+
+transpose :: Num a => [[a]] -> [[a]]
+transpose [] = []
+transpose (line:lines) = foldl nest (replicate' (length' line) []) (line:lines)
+
+transpose_test1 = transpose [[1,2,3,4],[2,3,4,5],[3,4,5,6]] == [[1,2,3],[2,3,4],[3,4,5],[4,5,6]]
+transpose_test2 = transpose [[1,2],[5,8],[(-1),6],[4,4]] == [[1,5,(-1),4],[2,8,6,4]]
+transpose_test3 = transpose [[1.5,2.1],[5.55,8.0],[(-1.7),6.0]] == [[1.5,5.55,(-1.7)],[2.1,8.0,6.0]]
+
+{--2) сумма двух матриц;--}
+zipWith' :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith' f xs ys = fst $ foldl (\(res, (k:ks)) y -> (res ++ [f k y], ks)) ([],xs) ys
+
+sumlines :: Num a => [a] -> [a] -> [a]
+sumlines = zipWith' (+) 
+
+(+++) :: Num a => [[a]] -> [[a]] -> [[a]]
+(+++) = zipWith' sumlines 
+
+sum_test1 = [[1,2,3],[1,3,5]] +++ [[2,1,5],[0,1,(-1)]] == [[3,3,8],[1,4,4]]
+sum_test2 = [[0,1],[9,5],[1,1]] +++ [[2,1],[0,1],[(-1),7]] == [[2,2],[9,6],[0,8]]
+sum_test3 = [[0,(-1)],[1,0]] +++ [[0,1],[(-1),0]] == [[0,0],[0,0]]
+
+{--3) произведение двух матриц.--}
+{--умножение строки на число--}
+pr_line line x = foldl (\a b -> a ++ [b*x]) [] line 
+
+{--произведение столбца и строки--}
+pr_lines line1 line2 = foldl (\res elem -> res ++ [pr_line line2 elem]) [] line1
+
+{--список матриц для суммирования--}
+pr_mx mx1 mx2 = zipWith' pr_lines (transpose mx1) mx2
+
+(***) :: Num a => [[a]] -> [[a]] -> [[a]]
+(***) mx1 mx2 = foldl1 (+++) $ pr_mx mx1 mx2
+
+f3_test1 = [[1,2],[3,4]] *** [[5,6],[7,8]] == [[19,22],[43,50]]
+f3_test2 = [[1,2,3],[4,5,6]] *** [[7,8],[9,10],[11,12]] == [[58,64],[139,154]]
+f3_test3 = [[1,10,33],[23,44,2],[5,98,3]] *** [[1,0,0],[0,1,0],[0,0,1]] == [[1,10,33],[23,44,2],[5,98,3]]
 
 
 {-
  6. Реализовать левую свёртку, пользуясь правой. Проанализировать поведение собственной реализации
   на бесконечных списках и сравнить его с поведением оригинальной foldl.
 -}
+reverse' :: [a] -> [a]
+reverse' = foldr (\x y -> y ++ [x]) []
+
+foldl' :: (a -> b -> a) -> a -> [b] -> a
+foldl' f x0 xs = foldr (flip f) x0 (reverse' xs)
+
+f6_test1 = foldl' (\xs x -> xs ++ [x]) "start" "process" == "startprocess"
+f6_test2 = foldl' (\(s,p) x -> (s+x, p*x)) (0,1) [1..4] == (10,24)
+f6_test3 = foldl' (\res d -> res && ((mod x d) /= 0)) True [2..(floor (sqrt (fromIntegral x) ) )] where x = 97553
+
+{--
+> foldl' (+) 0 [1..]
+*** Exception: stack overflow 
+(нехвостовая рекурсия)
+--}
+
+{--
+foldl (+) 0 [1..] 
+GHC занял 85% оперативной памяти
+(хвостовая рекурсия)
+--}
