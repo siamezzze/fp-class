@@ -20,12 +20,13 @@ test1 = and $ map (\x -> x == hms2sec (sec2hms x)) [1,10..10000]
 -- б) периметр и площадь треугольника по координатам вершин.
 
 type Point = (Double, Double)
---Похоже, уже есть стандартый length, для списков
-length' :: Point -> Point -> Double
-length' (x1, y1) (x2, y2) = sqrt((x2-x1)^2 + (y2-y1)^2)
+
+distance :: Point -> Point -> Double
+distance (x1, y1) (x2, y2) = undefined
 
 triangle :: Point -> Point -> Point -> (Double, Double)
 triangle a b c = (p, s)
+triangle _ = (p, s)
   where
     p = (length' a b) + (length' b c) + (length' c a)
     s = sqrt (p * (p - length' a b) * (p - length' b c) * (p - length' c a))
@@ -49,13 +50,11 @@ doubleElems :: Num a => [a] -> [a]
 doubleElems [] = []
 doubleElems (x:xs) = (x*2) : doubleElems xs
 
-
 -- 2.3
 -- Дан список целых чисел. Сформировать новый список, содержащий только нечетные элементы исходного.
 fltOdd :: Integral a => [a] -> [a]
 fltOdd [] = []
 fltOdd (x:xs) = if odd x then x : fltOdd xs else fltOdd xs 
-
 
 -- 2.4
 -- Написать следующие функции обработки списков:
