@@ -10,7 +10,11 @@
 import System.Environment
 
 createFile :: Int -> String -> FilePath -> IO ()
-createFile n s fname = undefined
+createFile n s fname =
+  let 
+    cont = foldl (++) "" $ replicate n s
+  in
+  writeFile fname cont 
 
 main = do
   [n_str, text, fname] <- getArgs
