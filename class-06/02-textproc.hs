@@ -12,5 +12,21 @@
   Все входные данные программы должны передаваться с помощью параметров
   командной строки.
 -}
+import System.Directory
+
+count_words :: String -> Int
+count_words = length . words
+
+count_words_in_file :: FilePath -> IO ()
+count_words_in_file filename = do
+  contents <- readFile filename
+  putStr $ show $ count_words contents
+
+append_start :: FilePath -> String -> IO()
+append_start filename s = do
+  contents <- readFile filename
+  writeFile ".tmp" (s ++ contents)
+  removeFile filename
+  renameFile ".tmp" filename
 
 main = undefined
