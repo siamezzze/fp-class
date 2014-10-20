@@ -13,6 +13,8 @@
   командной строки.
 -}
 import System.Directory
+import Data.Char
+import System.Random
 
 count_words :: String -> Int
 count_words = length . words
@@ -28,5 +30,34 @@ append_start filename s = do
   writeFile ".tmp" (s ++ contents)
   removeFile filename
   renameFile ".tmp" filename
+
+{--appendFile :: FilePath -> String -> IO ()--}
+
+out_upper :: FilePath -> IO ()
+out_upper filename = do
+  contents <- readFile filename
+  putStr $ map toUpper contents
+  
+concat_strings_in_file :: String -> String -> String
+concat_strings_in_file a b = unlines $ zipWith (++) (lines a) (lines b)
+
+rand_int :: StdGen -> (Int, StdGen)
+rand_int gen = randomR (2, 20) gen :: (Int, StdGen)
+
+
+
+rand_chars :: ([Char], StdGen) -> ([Char], StdGen)
+rand_chars (_,gen) = 
+	let (nchars, newGen) = rand_int gen 
+	    line = take nchars $ randomRs (' ', '~') newGen
+	    newGen' = snd (random newGen :: (Int, StdGen)) in
+	(line, newGen')
+
+rand_file :: FilePath -> IO ()
+rand_file fname = do
+  gen <- newStdGen
+  let (nlines, newGen) = rand_int gen
+  let strr = tail $ take nlines $ map (fst) $ iterate (rand_chars) ([],newGen)
+  writeFile fname (unlines strr)
 
 main = undefined
