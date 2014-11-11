@@ -5,7 +5,7 @@ import System.Environment
 -}
 
 totalLength :: [String] -> Int
-totalLength = undefined
+totalLength = sum . map (length)
 
 {-
   Написать функцию, которая по заданному символу и целому числу n строит список строк,
@@ -13,7 +13,8 @@ totalLength = undefined
 -}
 
 build1 :: Char -> Int -> Maybe [String]
-build1 = undefined
+build1 _ 0 = Nothing
+build1 c n = Just (take n $ iterate (++ [c]) [c])
 
 {-
   Написать функцию, аналогичную по возможностям функции build1, но возвращающую при этом
@@ -25,7 +26,11 @@ build1 = undefined
 -}
 
 build2 :: Char -> Int -> Either String [String]
-build2 = undefined
+build2 'x' _ = Left "Forbidden."
+build2 c n 
+  | n <= 0 = Left "n should be positive number"
+  | n > 100 = Left "n should be less than 100"
+  | otherwise = Right (take n $ iterate (++ [c]) [c])
 
 {-
   Параметрами командной строки являются имя файла, символ, целое число.
@@ -39,5 +44,14 @@ build2 = undefined
      Maybe и Either String как функторов).
 -}
 
-main = do
-  undefined
+main = do 
+  tl1 <- totalLength `fmap` getArgs
+  print tl1
+  tl2 <- head `fmap` getArgs >>= fmap (totalLength . lines) . readFile
+  print tl2
+  ch <- (read . (!! 1)) `fmap` getArgs
+  n <- (read . (!! 2)) `fmap` getArgs
+  let tl3 = totalLength `fmap` (build1 ch n)
+  print tl3  
+  let tl4 = totalLength `fmap` (build2 ch n)
+  print tl4 
