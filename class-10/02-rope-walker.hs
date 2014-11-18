@@ -25,23 +25,36 @@ type Pole = (Birds, Birds)
 
 balance = 3
 
-updatePole :: Pole -> Maybe Pole
-updatePole p = if unbalanced p then Nothing else Just p
-  where
-    unbalanced (l, r) = abs (l - r) > balance
+updatePole :: Pole -> Either String Pole
+updatePole (l,r) = if (l > r + balance) then Left "Too many birds at left side" else if (l < r - balance) then Left "Too many birds at right side" else Right (l,r)
 
-landLeft :: Birds -> Pole -> Maybe Pole
+landLeft :: Birds -> Pole -> Either String Pole
 landLeft n (left, right) = updatePole (left + n, right)
 
-landRight :: Birds -> Pole -> Maybe Pole
+landRight :: Birds -> Pole -> Either String Pole
 landRight n (left, right) = updatePole (left, right + n)
 
-banana :: Pole -> Maybe Pole
-banana = const Nothing
+landBoth :: Birds -> Birds -> Pole -> Either String Pole
+landBoth l r (left, right) = updatePole (left + l, right + r)
 
-tests = all test [1..3]
+unlandAll :: Pole -> Either String Pole
+unlandAll = const (Right (0,0))
+
+banana :: Pole -> Either String Pole
+banana = const (Left "Banana")
+
+{-tests = all test [1..3]
   where
     test 1 = (return (0, 0) >>= landLeft 1 >>= landRight 4 
               >>= landLeft (-1) >>= landRight (-2)) == Nothing
     test 2 = (return (0, 0) >>= landRight 2 >>= landLeft 2 >>= landRight 2) == Just (2, 4)
-    test 3 = (return (0, 0) >>= landLeft 1 >>= banana >>= landRight 1) == Nothing
+    test 3 = (return (0, 0) >>= landLeft 1 >>= banana >>= landRight 1) == Nothing-}
+
+land :: [String] -> Pole -> Either String Pole
+land ["L", k] = landLeft (read k)
+land ["R", k] = landRight (read k)
+land ["LR", l, r] = landBoth (read l) (read r)
+land ["U"] = unlandAll
+land ["B"] = banana
+
+fromFile fname = (return (0,0) >>= )`liftM` (foldr (<=<) return) `liftM` (map (land. words)) `liftM` (reverse.lines) `liftM` (readFile fname)
