@@ -10,7 +10,7 @@ data Config = Config [Action]
 doOp :: Action -> Integer -> Integer
 doOp (Action Sum n) = ( + n)
 doOp (Action Mult n) = ( * n)
-doOp (Action Div n) = ( div n)
+doOp (Action Div n) = ( `div` n)
 
 work :: Integer -> Reader Config String
 work a = do
@@ -32,5 +32,5 @@ main = do
   [configfname, numbersfname] <- getArgs
   cfg <- loadConfig configfname
   numbers <- (map (read) . words) `liftM` (readFile numbersfname)
-  mapM_ (putStrLn . runReader . work) numbers
+  mapM_ (\x -> putStrLn $ runReader  (work x) cfg) numbers
   
