@@ -11,25 +11,37 @@
 import Control.Monad
 import Control.Monad.Trans
 import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Reader
+import Control.Monad.Trans.Writer.Strict
+import System.Environment
 
 import Data.Char
 
-isValid :: String -> Bool
-isValid s = length s >= 8 && 
-                any isAlpha s && 
-                any isNumber s && 
-                any isPunctuation s
+data Config = Config Int Bool Bool Bool
 
-getValidPassword :: MaybeT IO String
+isValid :: Config -> String -> Bool
+isValid (Config n hasLetters hasDigits hasPunctuation) s = length s >= n && 
+                (if hasLetters then any isAlpha s else True) && 
+                (if hasDigits then any isNumber s else True) && 
+                (if hasPunctuation then any isPunctuation s else True)
+
+getValidPassword :: MaybeT (WriterT [String] (ReaderT Config IO)) String
 getValidPassword = do
-  lift $ putStrLn "Введите новый пароль:"
-  s <- lift getLine
-  guard (isValid s)
+  lift $ lift $ lift $ putStrLn "Введите новый пароль:"
+  s <- lift $ lift $ lift $ getLine
+  conf <- lift $ lift $ ask
+  lift $ tell [s]
+  guard (isValid conf s)
   return s
  
-askPassword :: MaybeT IO ()
+askPassword :: MaybeT (WriterT [String] (ReaderT Config IO)) ()
 askPassword = do
   value <- msum $ repeat getValidPassword
-  lift $ putStrLn "Сохранение в базе данных..."
+  lift $ lift $ lift $ putStrLn "Сохранение в базе данных..."
 
-main = runMaybeT askPassword
+getConfig :: [String] -> Config
+getConfig [a1, a2, a3, a4] = Config (read a1) (read a2) (read a3) (read a4)  
+
+main = do
+  args <- getArgs
+  runReaderT (runWriterT (runMaybeT askPassword)) (getConfig args)
