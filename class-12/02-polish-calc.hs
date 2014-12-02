@@ -24,20 +24,28 @@
 
 
 import Control.Monad
+import Data.Maybe
 import Control.Monad.State
+import Control.Monad.Trans
+import Control.Monad.Trans.Maybe
 
 type Stack = [Int]
 
-push :: Int -> State Stack ()
-push x = get >>= put . (x:)
+push :: Maybe Int -> MaybeT (State Stack) ()
+push x = do
+  xs <- lift $ get
+  guard (isJust x) 
+  lift $ put ((fromJust x):xs)
 
-pop :: State Stack Int
-pop = get >>= \(x:xs) -> put xs >> return x
+pop :: MaybeT (State Stack) Int
+pop = do
+  (x:xs) <- lift $ get
+  lift $ put xs
+  return x
 
-evalRPN :: String -> Int
 evalRPN xs = head $ execState (mapM step $ words xs) []
   where
-    step "+" = processTops (+)
-    step "*" = processTops (*)
-    step  n  = push (read n)
-    processTops op = op `liftM` pop `ap` pop >>= push
+    step "+" = processTops (liftM2 (+))
+    step "*" = processTops (liftM2 (*))
+    step  n  = runMaybeT (push (Just (read n)))
+    processTops op = op `liftM` (runMaybeT pop) `ap` (runMaybeT pop) >>= (\x -> runMaybeT (push x))
